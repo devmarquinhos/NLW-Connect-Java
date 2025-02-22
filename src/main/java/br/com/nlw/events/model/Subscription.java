@@ -20,6 +20,10 @@ public class Subscription {
     private Event event;
 
     @ManyToOne
-    @JoinColumn(name = "subscribed_user_id", nullable = true)
+    @JoinColumn(name = "subscribed_user_id")
     private User user;
+
+    @ManyToOne
+    @JoinColumn(name = "indication_user_id", nullable = true)
+    private User indication;
 }
