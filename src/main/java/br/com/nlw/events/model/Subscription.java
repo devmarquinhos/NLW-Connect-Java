@@ -1,6 +1,4 @@
 package br.com.nlw.events.model;
-import br.com.nlw.events.model.Event;
-import br.com.nlw.events.model.User;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -13,7 +11,7 @@ public class Subscription {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "subscription_number")
-    private Integer id;
+    private Integer subscriptionNumber;
 
     @ManyToOne
     @JoinColumn(name = "event_id")
@@ -21,7 +19,7 @@ public class Subscription {
 
     @ManyToOne
     @JoinColumn(name = "subscribed_user_id")
-    private User user;
+    private User subscriber;
 
     @ManyToOne
     @JoinColumn(name = "indication_user_id", nullable = true)

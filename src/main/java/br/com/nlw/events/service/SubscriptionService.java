@@ -22,12 +22,16 @@ public class SubscriptionService {
 
     public Subscription createNewSubscription(String eventName, User user) {
         // Recuperando o evento pelo nome
-        Event evt = evtRepo.getByPrettyName(eventName);
-        userRepo.save(user);
+        Event evt = evtRepo.findByPrettyName(eventName);
+        User userRec = userRepo.findByEmail(user.getEmail());
+        System.out.println(userRec);
+        if (userRec == null) {
+            userRec = userRepo.save(user);
+        }
 
         Subscription subs = new Subscription();
         subs.setEvent(evt);
-        subs.setUser(user);
+        subs.setSubscriber(userRec);
 
         Subscription res = subRepo.save(subs);
         return res;
