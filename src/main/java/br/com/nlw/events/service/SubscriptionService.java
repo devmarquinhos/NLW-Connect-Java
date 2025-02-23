@@ -1,5 +1,8 @@
 package br.com.nlw.events.service;
+import br.com.nlw.events.dto.SubscriptionResponse;
 import br.com.nlw.events.exception.EventNotFoundException;
+import br.com.nlw.events.exception.SubscriptionConflictException;
+import br.com.nlw.events.exception.UserIndicatorNotFoundException;
 import br.com.nlw.events.model.Event;
 import br.com.nlw.events.model.User;
 import br.com.nlw.events.model.Subscription;
@@ -21,23 +24,40 @@ public class SubscriptionService {
     @Autowired
     private SubscriptionRepo subRepo;
 
-    public Subscription createNewSubscription(String eventName, User user) {
+    public SubscriptionResponse createNewSubscription(String eventName, User user, Integer userId) {
         // Recuperando o evento pelo nome
         Event evt = evtRepo.findByPrettyName(eventName);
+        // Caso alternativo 2
         if (evt == null) {
-            throw new EventNotFoundException("Evento "+ eventName + " não encontrado");
+            throw new EventNotFoundException("Evento "+ eventName + " não existe");
         }
-        User userRec = userRepo.findByEmail(user.getEmail());
 
+        // caso Alternativo 1
+        User userRec = userRepo.findByEmail(user.getEmail());
         if (userRec == null) {
             userRec = userRepo.save(user);
         }
+        User indicator = null;
+        if (userId != null) {
+            indicator = userRepo.findById(userId).orElse(null);
+            if (indicator == null) {
+                throw new UserIndicatorNotFoundException("O Usuário " + userId + " não existe");
+            }
+        }
+
 
         Subscription subs = new Subscription();
         subs.setEvent(evt);
         subs.setSubscriber(userRec);
+        subs.setIndication(indicator);
+
+        // Caso Alternativo 3
+        Subscription tmpSub = subRepo.findByEventAndSubscriber(evt, userRec);
+        if (tmpSub != null) {
+            throw new SubscriptionConflictException("Já existe inscrição para o usuário " + userRec.getName() + " no evento " + evt.getTitle());
+        }
 
         Subscription res = subRepo.save(subs);
-        return res;
+        return new SubscriptionResponse(res.getSubscriptionNumber(), "http://codecraft.com/subscription/"+res.getEvent().getPrettyName()+"/"+res.getSubscriber().getId());
     }
 }
